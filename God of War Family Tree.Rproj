@@ -1,13 +1,124 @@
-Version: 1.0
+#installation of R-Studio Packages
+install.packages("tidyverse")
+install.packages("igraph")
 
-RestoreWorkspace: Yes
-SaveWorkspace: Yes
-AlwaysSaveHistory: Yes
+library(igraph)
+g <- graph.empty(directed =TRUE)
+# Vertex's and nodes of Specific characters and their offsprings in god of war game. 
+g <- g + vertex("Zeus")
+g <- g + vertex("Hera")
+g <- g + vertex("Poseidon")
+g <- g + vertex("Hades")
+g <- g + vertex("Hestia")
+g <- g + vertex("Ares")
+g <- g + vertex("Aphrodite")
+g <- g + vertex("Athena")
+g <- g + vertex("Apollo")
+g <- g + vertex("Hermes")
+g <- g + vertex("Kratos")
+g <- g + vertex("Lynsandra")
+g <- g + vertex("Calliope")
+g <- g + vertex("Faye")
+g <- g + vertex("Arteus") 
+g <- g + vertex("Laufey") 
+g <- g + vertex("Fornjot") 
+g <- g + vertex("Ymir") 
+g <- g + vertex("Bol?orn") 
+g <- g + vertex("Mimir") 
+g <- g + vertex("Bestla") 
+g <- g + vertex("Odin") 
+g <- g + vertex("Freya") 
+g <- g + vertex("Baldur") 
+g <- g + vertex("Jord") 
+g <- g + vertex("Thor")
+g <- g + vertex("Sif") 
+g <- g + vertex("Modi") 
+g <- g + vertex("Magni") 
+g <- g + vertex("Jarnsaxa") 
+g <- g + vertex("Persephone") 
 
-EnableCodeIndexing: Yes
-UseSpacesForTab: Yes
-NumSpacesForTab: 2
-Encoding: UTF-8
+# edges including the norse and greek families connecting from god of war game. 
+g <- g + edges("Zeus", "Poseidon")
+g <- g + edges("Zeus", "Hades")
+g <- g + edges("Zeus", "Hestia")
+g <- g + edges("Zeus", "Ares")
+g <- g + edges("Zeus", "Aphrodite")
+g <- g + edges("Zeus", "Athena")
+g <- g + edges("Zeus", "Apollo")
+g <- g + edges("Zeus", "Hermes")
+g <- g + edges("Zeus", "Persephone")
+g <- g + edges("Zeus", "Kratos")
+g <- g + edges("Hera", "Ares")
+g <- g + edges("Kratos", "Calliope")
+g <- g + edges("Kratos", "Arteus")
+g <- g + edges("Lynsandra", "Calliope")
+g <- g + edges("Faye", "Arteus")
+g <- g + edges("Arteus", "Laufey")
+g <- g + edges("Laufey", "Fornjot")
+g <- g + edges("Fornjot", "Ymir")
+g <- g + edges("Bol?orn", "Ymir")
+g <- g + edges("Mimir", "Bol?orn")
+g <- g + edges("Bestla", "Bol?orn")
+g <- g + edges("Odin", "Bestla")
+g <- g + edges("Odin", "Freya")
+g <- g + edges("Odin", "Baldur")
+g <- g + edges("Odin", "Jord")
+g <- g + edges("Odin", "Thor")
+g <- g + edges("Freya", "Baldur")
+g <- g + edges("Jord", "Thor")
+g <- g + edges("Thor", "Sif")
+g <- g + edges("Thor", "Modi")
+g <- g + edges("Sif", "Modi")
+g <- g + edges("Thor", "Jarnsaxa")
+g <- g + edges("Thor", "Magni")
+g <- g + edges("Jarnsaxa", "Magni")
 
-RnwWeave: Sweave
-LaTeX: pdfLaTeX
+g
+
+plot.igraph(g)
+
+lout <- layout.fruchterman.reingold(g)
+
+plot.igraph(g, layout=lout, vertex.size= 8, vertex.label.cex=0.6,
+            edge.width=(E(g)$weight)/5, edge.arrow.size = 0.15)
+
+#Centrality portion
+
+eigenCent <- evcent(g)$vector
+sort(eigenCent,decreasing=TRUE) [1:10]
+
+bins <- unique(quantile(eigenCent, seq(0,1, length.out=30)))
+vals <- cut(eigenCent, bins, labels=FALSE, include.lowest=TRUE)
+colorsVals <- rev(heat.colors(length(bins)))[vals]
+
+V(g)$color <- colorsVals
+
+#Centrality graph plotted with labels of all characters in the game God of War
+plot.igraph(g, layout=lout, vertex.size= 8, vertex.label.cex=0.6,
+            edge.width=(E(g)$weight)/5, edge.arrow.size = 0.15)
+
+betweenCent <- betweenness(g)
+sort(betweenCent,decreasing=TRUE)[1:10]
+
+cor(betweenCent,eigenCent)
+
+betweenCent <- betweenness(g)
+eigencent <- evcent(g)$vector
+colorVals <- rep("white", length(betweenCent))
+colorVals[which(eigenCent < -.20 & betweenCent >8 )] <- "red"
+V(g)$color <- colorVals
+plot.igraph(g, layout=lout, vertex.size=5, vertex.label.cex=0.5,edge.width=(E(g)$weight)/5)
+
+#Sorting and betweeness graphing - mixed with color valuation code
+w <- edge.betweenness.community(g)
+sort(table(w$membership))
+
+V(g)$color <- rep("white", length(w$membership))
+keepTheseCommunities <- names(sizes(w))[sizes(w) > 3]
+matchIndex <- match(w$membership, keepTheseCommunities)
+colorVals <- rainbow(5)[matchIndex[!is.na(matchIndex)]]
+V(g)$color[!is.na(matchIndex)] <- colorVals
+
+#Centrality Plotting with color coded patterns and characters names
+plot.igraph(g, layout=lout, vertex.size= 8, vertex.label.cex=0.6,
+            edge.width=(E(g)$weight)/5, edge.arrow.size = 0.15)
